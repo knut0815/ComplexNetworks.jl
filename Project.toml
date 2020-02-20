@@ -3,6 +3,9 @@ uuid = "28bc61e1-31f6-4ab9-bdb5-51d7d6623337"
 authors = ["Johannes Zierenberg"]
 version = "0.1.0"
 
+[deps]
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+
 [compat]
 julia = "1.2"
 

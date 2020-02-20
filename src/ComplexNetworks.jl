@@ -1,5 +1,6 @@
 module ComplexNetworks
 
-greet() = print("Hello World!")
+include("hierarchical.jl")
+include("modular.jl")
 
 end # module
