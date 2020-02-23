@@ -2,8 +2,6 @@
 Generate hierarchical networks 
 cf. Moretti & Munoz, Nat. Communi. 2013
 """
-using LightGraphs
-using Random
 
 """
     hierarchical(p::Vector{Float64}, n::Int64, seed::Int; verbose=false, write_to="")::SimpleGraph{Int}
