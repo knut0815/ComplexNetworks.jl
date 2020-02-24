@@ -39,7 +39,7 @@ p=0.1*(ones(3,3)-I) + I*0.5
 g=modular_uniform(p, 10, is_directed=true)
 am = Matrix(adjacency_matrix(g))
 
-this is a stochastic block matrix ...
+this is similar to stochastic block matrix ...
 """
 function modular_uniform(p::Array{Float64,2}, n::Vector{Int64}; seed::Integer=-1, is_directed=false)
   @assert size(p)[1] == size(p)[2]  #square matrix
@@ -54,58 +54,26 @@ function modular_uniform(p::Array{Float64,2}, n::Vector{Int64}; seed::Integer=-1
     rng = Random.GLOBAL_RNG
   end
 
-  #does not work it seems
-  if is_directed
-    #problem: need to get index k from index i
-    # where k=1 for i=1:n[1], k=2 for i=n[1]+1:n[1]+n[2]
-    cumsum_n = cumsum(n)
-    k = 1
-    for i = 1:N
-      if i > cumsum_n[k]
-        k += 1
+  #we need the cumsum in order to evaluate to which module each index belongs
+  cumsum_n = cumsum(n)
+  module_i = 1
+  for i = 1:N
+    module_i += i <= cumsum_n[module_i] ? 0 : 1
+    #this is a sufficient start because even though j_min can be i+1, module_j
+    #is checked at beginning of loop and would increase in case of violation
+    module_j = module_i
+    for j = i+1:N
+      module_j += j <= cumsum_n[module_j] ? 0 : 1
+      if rand(rng) < p[module_i,module_j]
+        add_edge!(network,i,j)
       end
-      l = 1
-      for j = 1:N
-        if j > cumsum_n[l]
-          l += 1
-        end
-        if i!=j && rand(rng) < p[k,l]
-          add_edge!(network,i,j)
+      if is_directed == true # in case directed also draw reverse edge with probability
+        if rand(rng) < p[module_j,module_i]
+          add_edge!(network,j,i)
         end
       end
     end
-  else
-    #todo
   end
   return network
-
-  #for index in CartesianIndices(p) 
-  #  i = index[1]
-  #  j = index[2]
-  #  if i==j
-  #    max_ne = is_directed ? n[i]*(n[i]-1) : div(n[i] * (n[i] - 1), 2)
-  #  else
-  #    max_ne = is_directed ? n[i]*n[j]     : div(n[i]*n[j], 2)
-  #  end
-  #  ne = LightGraphs.SimpleGraphs.randbn(max_ne, p[index], seed=seed+i)
-
-  #  nmin_i = i==1 ? 1 : sum(n[i-1]
-  #  nmin_j = j==1 ? 1 : sum(n[j-1]
-  #  
-  #  nmax_i = i==lenght(n) ? N : sum(n[i+1]
-  #  nmax_j = j==lenght(n) ? N : sum(n[j+1]
-
-  #  ne_old = network.ne
-  #  while network.ne - ne_old < ne
-  #    source = rand(rng, nmin_i:nmax_i)
-  #    dest   = rand(rng, nmin_j:nmax_j)
-  #    if i==j
-  #      source != dest && add_edge!(network, source, dest)
-  #    else
-  #      add_edge!(network, source, dest)
-  #    end
-  #  end
-  #end
-  
-  
 end
+
